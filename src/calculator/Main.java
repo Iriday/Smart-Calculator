@@ -15,8 +15,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //int a;
-        //int b;
         Main main = new Main();
         main.process();
     }
@@ -37,10 +35,13 @@ public class Main {
                 System.out.println("The program can add, and subtract numbers. Examples: -2 + 4 - 5 + 6, 9 +++ 10 -- 8, 3 --- 5, 14  -   12.");
                 continue;
             }
+            if (!checkInput(input)) {
+                continue;
+            }
 
             numberPattern = Pattern.compile("[-+]?\\d+");
             matcher = numberPattern.matcher(input);
-            if(!matcher.find()) {//;boolean f = System.out.println(f);//matches()
+            if (!matcher.find()) {
                 continue;
             }
             a = Integer.parseInt(input.substring(matcher.start(), matcher.end()));
@@ -96,4 +97,24 @@ public class Main {
         return a - b;
     }
 
+    private boolean checkInput(String input) {
+        boolean valid = true;
+
+        if (input.isEmpty() || input.matches(" +")) {
+            valid = true;
+        } else if (input.matches(" */.*")) {
+            System.out.println("Unknown command");
+            valid = false;
+        } else if (input.matches(" *[-+]?\\d+ *")) {
+            valid = true;
+        } else if (input.matches(".*[^\\d +[-]].*")) {
+            System.out.println("Invalid expression");
+            valid = false;
+        } else if (!input.matches(".*\\d+.*[-+]+.*\\d+ *")) {
+            System.out.println("Invalid expression");
+            valid = false;
+        }
+        return valid;
+    }
 }
+
