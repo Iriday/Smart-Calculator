@@ -1,46 +1,99 @@
 package calculator;
 
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
+    enum Operators {ADD, SUBTRACT, MULTIPLY, DIVIDE, EMPTY}
+
+    private Pattern numberPattern;
+    private Matcher matcher;
+    //private Pattern operator;
+    private Operators operators = Operators.EMPTY;
+    private String actionsRegex = "[^+-]";
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+
         //int a;
         //int b;
-        String[] input;
+        Main main = new Main();
+        main.process();
+    }
 
-        int sum = 0;
+    private void process() {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        int a;
+        int b;
+
         while (true) {
-            input = scanner.nextLine().split(" ");
+            input = scanner.nextLine();
 
-            if (input.length >= 2) {
-                for (String num : input) {
-                    try {
-                        sum += Integer.parseInt(num);
-                    } catch (Exception e) {
-                        break;
-                    }
-                }
-                System.out.println(sum);
-                sum = 0;
+            if ("/exit".equalsIgnoreCase(input)) {
+                System.out.println("Bye!");
+                break;
+            } else if ("/help".equalsIgnoreCase(input)) {
+                System.out.println("The program can add, and subtract numbers. Examples: -2 + 4 - 5 + 6, 9 +++ 10 -- 8, 3 --- 5, 14  -   12.");
+                continue;
+            }
 
-            } else if (input.length == 1) {
-                if ("/exit".equalsIgnoreCase(input[0])) {
-                    System.out.println("Bye!");
-                    break;
+            numberPattern = Pattern.compile("[-+]?\\d+");
+            matcher = numberPattern.matcher(input);
+            if(!matcher.find()) {//;boolean f = System.out.println(f);//matches()
+                continue;
+            }
+            a = Integer.parseInt(input.substring(matcher.start(), matcher.end()));
 
-                } else if ("/help".equalsIgnoreCase(input[0])) {
-                    System.out.println("The program calculates the sum of numbers");
+            numberPattern = Pattern.compile("\\d+");//[-+]?
+            for (; true; ) {
+                input = input.substring(matcher.end());
 
+                matcher = numberPattern.matcher(input);
+                if (matcher.find()) {
+                    b = Integer.parseInt(input.substring(matcher.start(), matcher.end()));
+
+                    String actions = input.substring(0, matcher.start()).replaceAll(actionsRegex, "");//.split
+                    a = result(actions, a, b);
+                    //System.out.println(a);
                 } else {
-                    try {
-                        System.out.println(Integer.parseInt(input[0]));
-                    } catch (Exception e) {
-                        continue;
-                    }
+                    break;
                 }
             }
+            System.out.println(a);
         }
     }
+
+    private int result(String actions, int a, int b) {
+        int result = -1;
+
+        for (char action : actions.toCharArray()) {
+            if (action == '+') {
+                operators = operators == Operators.EMPTY || operators == Operators.ADD ? Operators.ADD : Operators.SUBTRACT;
+
+            } else if (action == '-') {
+                operators = operators == Operators.EMPTY || operators == Operators.ADD ? Operators.SUBTRACT : Operators.ADD;
+            }
+        }
+
+        switch (operators) {
+            case ADD:
+                result = add(a, b);
+                break;
+            case SUBTRACT:
+                result = subtract(a, b);
+                break;
+        }
+        operators = Operators.EMPTY;
+        return result;
+    }
+
+    public static int add(int a, int b) {
+        return a + b;
+    }
+
+    public static int subtract(int a, int b) {
+        return a - b;
+    }
+
 }
