@@ -1,5 +1,6 @@
 package calculator;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +13,7 @@ public class Main {
     private final Pattern wordPattern = Pattern.compile("[a-zA-Z]+");
     private Matcher matcher;
     //private final String actionsRegex = "[^+-]";
-    private final Map<String, Integer> variables = new HashMap<>();
+    private final Map<String, BigInteger> variables = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -63,40 +64,40 @@ public class Main {
         matcher.find();
         String variableName = input.substring(matcher.start(), matcher.end());
         matcher.find();
-        int variableValue = valueOf(input.substring(matcher.start(), matcher.end()));
+        BigInteger variableValue = valueOf(input.substring(matcher.start(), matcher.end()));
         variables.put(variableName, variableValue);
     }
 
-    private int valueOf(String val) {
-        int a;
-        try {
-            a = Integer.parseInt(val);
-        } catch (Exception e) {
+    private BigInteger valueOf(String val) {
+        BigInteger a;
+        if (val.matches("[a-zA-Z]+")) {
             a = variables.get(val);
+        } else {
+            a = new BigInteger(val);
         }
         return a;
     }
 
-    public static int add(int a, int b) {
-        return a + b;
+    public static BigInteger add(BigInteger a, BigInteger b) {
+        return a.add(b);
     }
 
-    public static int subtract(int a, int b) {
-        return a - b;
+    public static BigInteger subtract(BigInteger a, BigInteger b) {
+        return a.subtract(b);
     }
 
-    public static int multiply(int a, int b) {
-        return a * b;
+    public static BigInteger multiply(BigInteger a, BigInteger b) {
+        return a.multiply(b);
     }
 
-    public static int divide(int a, int b) {
-        return a / b;
+    public static BigInteger divide(BigInteger a, BigInteger b) {
+        return a.divide(b);
     }
 
-    public static int power(int a, int b) {
-        int result = a;
-        for (int i = 1; i < b; i++) {
-            result *= a;
+    public static BigInteger power(BigInteger a, BigInteger b) {
+        BigInteger result = a;
+        for (BigInteger i = BigInteger.ONE; i.compareTo(b) < 0; i = i.add(BigInteger.ONE)) {
+            result = result.multiply(a);
         }
         return result;
     }
@@ -195,30 +196,30 @@ public class Main {
         return queue;
     }
 
-    public int compute(Queue<String> inputInPostfix) {
-        Stack<Integer> result = new Stack<>();
+    public BigInteger compute(Queue<String> inputInPostfix) {
+        Stack<BigInteger> result = new Stack<>();
 
         for (String element : inputInPostfix) {
             if (element.matches("^[+[-]]\\d+|[\\da-zA-Z]+")) {
                 result.push(valueOf(element));
             } else if (element.equals("+")) {
-                int a = result.pop();
-                int b = result.pop();
-                int value = add(a, b);
+                BigInteger a = result.pop();
+                BigInteger b = result.pop();
+                BigInteger value = add(a, b);
                 result.push(value);
             } else if (element.equals("-")) {
-                int a = result.pop();
-                int b = result.pop();
+                BigInteger a = result.pop();
+                BigInteger b = result.pop();
                 result.push(subtract(b, a));
             } else if (element.equals("*")) {
                 result.push(multiply(result.pop(), result.pop()));
             } else if (element.equals("/")) {
-                int a = result.pop();
-                int b = result.pop();
+                BigInteger a = result.pop();
+                BigInteger b = result.pop();
                 result.push(divide(b, a));
             } else if (element.equals("^")) {
-                int a = result.pop();
-                int b = result.pop();
+                BigInteger a = result.pop();
+                BigInteger b = result.pop();
                 result.push(power(b, a));
             }
         }
@@ -306,7 +307,7 @@ public class Main {
         if (index != -1) {
             if (input.matches(" *[a-zA-Z]+ *= *[\\da-zA-Z]+ *")) {
                 return true;
-            }else {
+            } else {
                 System.out.println("Invalid assignment");
                 return false;
             }
@@ -320,7 +321,7 @@ public class Main {
             }
         }
         //input = input.substring(index + 1);
-        Pattern pattern = Pattern.compile("[\\da-zA-Z]+( *[^+[-]*/^] *)+?[\\da-zA-Z]+");// \\w
+        Pattern pattern = Pattern.compile("[\\da-zA-Z]+( *[()]* *[[^+[-]*/^]&&[()]\\*] *)+?[()]* *[\\da-zA-Z]+");
         matcher = pattern.matcher(input);
         if (matcher.find()) {
             System.out.println("Invalid expression");
