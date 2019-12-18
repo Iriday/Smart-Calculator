@@ -5,20 +5,19 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Main {
+public class Calculator {
     /*enum Operators {ADD, SUBTRACT, MULTIPLY, DIVIDE, EMPTY}*/
 
     private final Pattern numberOrWordPattern = Pattern.compile("\\d+|[a-zA-Z]+");
     //private final Pattern numberPattern = Pattern.compile("([-+]?\\d+|[a-zA-Z]+)");
-    private final Pattern wordPattern = Pattern.compile("[a-zA-Z]+");
     private Matcher matcher;
     //private final String actionsRegex = "[^+-]";
     private final Map<String, BigInteger> variables = new HashMap<>();
 
     public static void main(String[] args) {
 
-        Main main = new Main();
-        main.process();
+        Calculator calculator = new Calculator();
+        calculator.process();
     }
 
     private void process() {
@@ -47,7 +46,7 @@ public class Main {
                 continue;
             }
 
-            if (!validInput(input)) {
+            if (!CheckInput.validInput(input, variables)) {
                 continue;
             }
             if (input.matches(" *[a-zA-Z]+ *= *(\\d+|[a-zA-Z]+).*")) {
@@ -76,30 +75,6 @@ public class Main {
             a = new BigInteger(val);
         }
         return a;
-    }
-
-    public static BigInteger add(BigInteger a, BigInteger b) {
-        return a.add(b);
-    }
-
-    public static BigInteger subtract(BigInteger a, BigInteger b) {
-        return a.subtract(b);
-    }
-
-    public static BigInteger multiply(BigInteger a, BigInteger b) {
-        return a.multiply(b);
-    }
-
-    public static BigInteger divide(BigInteger a, BigInteger b) {
-        return a.divide(b);
-    }
-
-    public static BigInteger power(BigInteger a, BigInteger b) {
-        BigInteger result = a;
-        for (BigInteger i = BigInteger.ONE; i.compareTo(b) < 0; i = i.add(BigInteger.ONE)) {
-            result = result.multiply(a);
-        }
-        return result;
     }
 
     public static String compressOperators(String input) {
@@ -205,137 +180,25 @@ public class Main {
             } else if (element.equals("+")) {
                 BigInteger a = result.pop();
                 BigInteger b = result.pop();
-                BigInteger value = add(a, b);
+                BigInteger value = ArithmeticOperations.add(a, b);
                 result.push(value);
             } else if (element.equals("-")) {
                 BigInteger a = result.pop();
                 BigInteger b = result.pop();
-                result.push(subtract(b, a));
+                result.push(ArithmeticOperations.subtract(b, a));
             } else if (element.equals("*")) {
-                result.push(multiply(result.pop(), result.pop()));
+                result.push(ArithmeticOperations.multiply(result.pop(), result.pop()));
             } else if (element.equals("/")) {
                 BigInteger a = result.pop();
                 BigInteger b = result.pop();
-                result.push(divide(b, a));
+                result.push(ArithmeticOperations.divide(b, a));
             } else if (element.equals("^")) {
                 BigInteger a = result.pop();
                 BigInteger b = result.pop();
-                result.push(power(b, a));
+                result.push(ArithmeticOperations.power(b, a));
             }
         }
         return result.peek();
-    }
-
-    private boolean validInput(String input) {
-        boolean valid = true;
-
-        if (input.isEmpty() || input.matches(" +")) {
-            return true;
-        }
-        if (input.matches(" */.*")) {
-            System.out.println("Unknown command");
-            return false;
-        }
-        // check the beginning of the string
-        if (!input.matches("^[(]*[-+]?[(]*[\\da-zA-Z].*")) {
-            System.out.println("Invalid expression");
-            return false;
-        }
-        // check the end of the string
-        if (!input.matches(".*[\\da-zA-Z][)]*$")) {
-            System.out.println("Invalid expression");
-            return false;
-        }
-        if (input.matches(" *[-+]?\\d+ *")) {
-            return true;
-        }
-        if (input.matches(" *[a-zA-Z]+ *")) {
-            String variable = input.trim();
-            if (variables.containsKey(variable)) {
-                return true;
-            } else
-                System.out.println("Unknown variable");
-            return false;
-        }
-        if (input.matches(".*[^\\d +[-]=a-zA-Z*/()^].*")) {
-            System.out.println("Invalid expression");
-            return false;
-        }
-        if (input.matches(" *(\\d+[a-zA-Z]+|[a-zA-Z]+\\d+) *= *\\d+ *")) {
-            System.out.println("Invalid identifier");
-            return false;
-        }
-        if (input.matches("(.*=.*=.*)|( *[a-zA-Z]+ *= *)")) {
-            System.out.println("Invalid assignment");
-            return false;
-        }
-        if (input.matches("(.*[a-zA-Z]+\\d+.*)|(.*\\d+[a-zA-Z]+.*)")) {
-            System.out.println("Invalid assignment");
-            return false;
-
-        }
-        if (input.matches(" *[a-zA-Z]+ *= *[a-zA-Z]+ *")) {
-            Pattern pattern = Pattern.compile("[a-zA-Z] *$");
-            matcher = pattern.matcher(input);
-            matcher.find();
-            String variableName = matcher.group().trim();
-            if (!variables.containsKey(variableName)) {
-                System.out.println("Unknown variable");
-                return false;
-            }
-        }
-        if (input.matches(".*\\d+.*=.*[a-zA-Z\\d]+.*")) {
-            System.out.println("Invalid assignment");
-            return false;
-        }
-        if (input.matches(" *[-+]?\\d+.*[a-zA-Z]+.*")) {
-            Pattern variableNamePattern = Pattern.compile("[a-zA-Z]+");
-            matcher = variableNamePattern.matcher(input);
-            while (matcher.find()) {
-                if (!variables.containsKey(matcher.group())) {
-                    System.out.println("Unknown variable");
-                    return false;
-                }
-            }
-        }
-        if (input.matches(".*[*]{2,}.*|.*[/]{2,}.*|.*[*&&/].*|.*[/&&*].*")) {
-            System.out.println("Invalid assignment");
-            return false;
-        }
-
-        int index = input.indexOf("=");
-        if (index != -1) {
-            if (input.matches(" *[a-zA-Z]+ *= *[\\da-zA-Z]+ *")) {
-                return true;
-            } else {
-                System.out.println("Invalid assignment");
-                return false;
-            }
-        }
-        // check all variables
-        matcher = wordPattern.matcher(input);
-        while (matcher.find()) {
-            if (!variables.containsKey(matcher.group())) {
-                System.out.println("Unknown variable");
-                return false;
-            }
-        }
-        //input = input.substring(index + 1);
-        Pattern pattern = Pattern.compile("[\\da-zA-Z]+( *[()]* *[[^+[-]*/^]&&[()]\\*] *)+?[()]* *[\\da-zA-Z]+");
-        matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            System.out.println("Invalid expression");
-            valid = false;
-        }
-
-        if (input.contains("(") || input.contains(")")) {
-            String parenthesis = input.replaceAll("[^()]+", "");
-            if (parenthesis.length() % 2 != 0) {
-                System.out.println("Invalid expression");
-                return false;
-            }
-        }
-        return valid;
     }
 }
 
