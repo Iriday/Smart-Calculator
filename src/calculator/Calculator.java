@@ -6,12 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Calculator {
-    /*enum Operators {ADD, SUBTRACT, MULTIPLY, DIVIDE, EMPTY}*/
-
-    private final Pattern numberOrWordPattern = Pattern.compile("\\d+|[a-zA-Z]+");
-    //private final Pattern numberPattern = Pattern.compile("([-+]?\\d+|[a-zA-Z]+)");
-    private Matcher matcher;
-    //private final String actionsRegex = "[^+-]";
+    private final Pattern numberWordPattern = Pattern.compile("[\\da-zA-Z]+");
     private final Map<String, BigInteger> variables = new HashMap<>();
 
     public static void main(String[] args) {
@@ -23,8 +18,6 @@ public class Calculator {
     private void process() {
         Scanner scanner = new Scanner(System.in);
         String input;
-        int a;
-        int b;
 
         while (true) {
             input = scanner.nextLine().replaceAll(" +", "");
@@ -49,21 +42,22 @@ public class Calculator {
             if (!CheckInput.validInput(input, variables)) {
                 continue;
             }
-            if (input.matches(" *[a-zA-Z]+ *= *(\\d+|[a-zA-Z]+).*")) {
+            if (input.matches("[a-zA-Z]+=[\\da-zA-Z]+")) {
                 addVariable(input);
                 continue;
             }
 
-            System.out.println(compute(infixToPostfix(compressOperators(input))));
+            BigInteger result = compute(infixToPostfix(compressOperators(input)));
+            System.out.println(result);
         }
     }
 
     private void addVariable(String input) {
-        matcher = numberOrWordPattern.matcher(input);
+        Matcher matcher = numberWordPattern.matcher(input);
         matcher.find();
-        String variableName = input.substring(matcher.start(), matcher.end());
+        String variableName = matcher.group();
         matcher.find();
-        BigInteger variableValue = valueOf(input.substring(matcher.start(), matcher.end()));
+        BigInteger variableValue = valueOf(matcher.group());
         variables.put(variableName, variableValue);
     }
 
@@ -78,12 +72,11 @@ public class Calculator {
     }
 
     public static String compressOperators(String input) {
-        Pattern plusesPattern = Pattern.compile("[+]{2,}");
-        Matcher matcher = plusesPattern.matcher(input);
+        Matcher matcher = Pattern.compile("[+]{2,}").matcher(input);
         input = matcher.replaceAll("+");
 
-        Pattern pattern1 = Pattern.compile("[-]{2,}");
-        matcher = pattern1.matcher(input);
+        Pattern pattern = Pattern.compile("[-]{2,}");
+        matcher = pattern.matcher(input);
         while (matcher.find()) {
             String val = matcher.group();
             if (val.length() % 2 == 0) {
@@ -91,14 +84,12 @@ public class Calculator {
             } else {
                 input = input.replaceAll(val, "-");
             }
-            matcher = pattern1.matcher(input);
+            matcher = pattern.matcher(input);
         }
         return input;
     }
 
     public static Queue<String> infixToPostfix(String infix) {
-        //String postFix = "";
-        //Stack<String> stack = new Stack<>();
         Deque<String> stack = new ArrayDeque<>();
         Queue<String> queue = new ArrayDeque<>();
 
@@ -129,7 +120,6 @@ public class Calculator {
                 stack.removeLast();
 
             } else if (inputElement.matches("[+[-]]")) {
-                //System.out.println("+ or -");
                 if (stack.isEmpty()) {
                     stack.offer(inputElement);
                 } else {
@@ -171,30 +161,32 @@ public class Calculator {
         return queue;
     }
 
-    public BigInteger compute(Queue<String> inputInPostfix) {
+    public BigInteger compute(Queue<String> inputPostfix) {
         Stack<BigInteger> result = new Stack<>();
-
-        for (String element : inputInPostfix) {
+        BigInteger a;
+        BigInteger b;
+        for (String element : inputPostfix) {
             if (element.matches("^[+[-]]\\d+|[\\da-zA-Z]+")) {
                 result.push(valueOf(element));
             } else if (element.equals("+")) {
-                BigInteger a = result.pop();
-                BigInteger b = result.pop();
-                BigInteger value = ArithmeticOperations.add(a, b);
-                result.push(value);
+                a = result.pop();
+                b = result.pop();
+                result.push(ArithmeticOperations.add(b, a));
             } else if (element.equals("-")) {
-                BigInteger a = result.pop();
-                BigInteger b = result.pop();
+                a = result.pop();
+                b = result.pop();
                 result.push(ArithmeticOperations.subtract(b, a));
             } else if (element.equals("*")) {
-                result.push(ArithmeticOperations.multiply(result.pop(), result.pop()));
+                a = result.pop();
+                b = result.pop();
+                result.push(ArithmeticOperations.multiply(b, a));
             } else if (element.equals("/")) {
-                BigInteger a = result.pop();
-                BigInteger b = result.pop();
+                a = result.pop();
+                b = result.pop();
                 result.push(ArithmeticOperations.divide(b, a));
             } else if (element.equals("^")) {
-                BigInteger a = result.pop();
-                BigInteger b = result.pop();
+                a = result.pop();
+                b = result.pop();
                 result.push(ArithmeticOperations.power(b, a));
             }
         }
