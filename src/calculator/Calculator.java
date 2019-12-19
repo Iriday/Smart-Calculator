@@ -72,21 +72,43 @@ public class Calculator {
     }
 
     public static String compressOperators(String input) {
-        Matcher matcher = Pattern.compile("[+]{2,}").matcher(input);
-        input = matcher.replaceAll("+");
+        StringBuilder builder = new StringBuilder();
+        char plus = '+';
+        char minus = '-';
+        int m = 0;
+        int p = 0;
 
-        Pattern pattern = Pattern.compile("[-]{2,}");
-        matcher = pattern.matcher(input);
-        while (matcher.find()) {
-            String val = matcher.group();
-            if (val.length() % 2 == 0) {
-                input = input.replaceAll(val, "+");
+        for (int i = 0; i < input.length() - 1; i++) {
+            if (input.charAt(i) != '+' && input.charAt(i) != '-') {
+                builder.append(input.charAt(i));
             } else {
-                input = input.replaceAll(val, "-");
+                if (input.charAt(i) == plus) {
+                    p++;
+                } else if (input.charAt(i) == minus) {
+                    m++;
+                }
+                if (input.charAt(i + 1) != '+' && input.charAt(i + 1) != '-') {
+                    if (m == 1 && p == 0 || p == 1 && m == 0) {
+                        builder.append(input.charAt(i));
+                    } else if (m == 0) {
+                        builder.append(plus);
+                    } else if (p == 0) {
+                        builder.append(m % 2 == 0 ? plus : minus);
+                    } else if (p == 1 && m == 1) {
+                        builder.append(minus);
+                    } else if (p > 1 && m == 1) {
+                        builder.append(minus);
+                    } else if (m > 1 && p == 1) {
+                        builder.append(m % 2 == 0 ? plus : minus);
+                    }
+                    m = 0;
+                    p = 0;
+                }
             }
-            matcher = pattern.matcher(input);
         }
-        return input;
+        builder.append(input.charAt(input.length() - 1));
+
+        return builder.toString();
     }
 
     public static Queue<String> infixToPostfix(String infix) {
