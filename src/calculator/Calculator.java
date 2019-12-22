@@ -39,7 +39,9 @@ public class Calculator {
                 continue;
             }
 
-            if (!CheckInput.validInput(input, variables)) {
+            String checkResult = CheckInput.check(input, variables);
+            if (!checkResult.equals("valid")) {
+                System.out.println(checkResult);
                 continue;
             }
             if (input.matches("[a-zA-Z]+=[\\da-zA-Z]+")) {
