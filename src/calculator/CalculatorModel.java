@@ -1,57 +1,48 @@
 package calculator;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Calculator {
-    private final Pattern numberWordPattern = Pattern.compile("[\\da-zA-Z]+");
+public class CalculatorModel {
+    private static final  Pattern numberWordPattern = Pattern.compile("[\\da-zA-Z]+");
     private final Map<String, BigInteger> variables = new HashMap<>();
+    private static final String help ="The program can add/subtract/multiply/divide numbers, supports parenthesis, variables, power operator.\n" +
+            "Examples: 9 +++ 10 -- 8 * 3 / 2,\n" +
+            "3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1),\n" +
+            "a = 2,\n" +
+            "b = 3,\n" +
+            "a + -3 -5 + (b + a),\n" +
+            "2 * 2^3.";
 
-    public static void main(String[] args) {
+    public String process(String input) {
+        input = input.replaceAll(" +", "");
 
-        Calculator calculator = new Calculator();
-        calculator.process();
-    }
-
-    private void process() {
-        Scanner scanner = new Scanner(System.in);
-        String input;
-
-        while (true) {
-            input = scanner.nextLine().replaceAll(" +", "");
-
-            if (input.isEmpty()) {
-                continue;
-            }
-            if ("/exit".equalsIgnoreCase(input)) {
-                System.out.println("Bye!");
-                break;
-            } else if ("/help".equalsIgnoreCase(input)) {
-                System.out.println("The program can add/subtract/multiply/divide numbers, supports parenthesis, variables, power operator.\n" +
-                        "Examples: 9 +++ 10 -- 8 * 3 / 2,\n" +
-                        "3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1),\n" +
-                        "a = 2,\n" +
-                        "b = 3,\n" +
-                        "a + -3 -5 + (b + a),\n" +
-                        "2 * 2^3.");
-                continue;
-            }
-
-            String checkResult = CheckInput.check(input, variables);
-            if (!checkResult.equals("valid")) {
-                System.out.println(checkResult);
-                continue;
-            }
-            if (input.matches("[a-zA-Z]+=[\\da-zA-Z]+")) {
-                addVariable(input);
-                continue;
-            }
-
-            BigInteger result = compute(InfixPostfixConverter.infixToPostfix(input));
-            System.out.println(result);
+        if (input.isEmpty()) {
+            return input;
         }
+        if ("/exit".equalsIgnoreCase(input)) {
+            return "Bye!";
+        } else if ("/help".equalsIgnoreCase(input)) {
+            return help;
+        }
+
+        String checkResult = CheckInput.check(input, variables);
+        if (!checkResult.equals("valid")) {
+            return checkResult;
+        }
+        if (input.matches("[a-zA-Z]+=[\\da-zA-Z]+")) {
+            addVariable(input);
+            return "";//"variable added"
+        }
+
+        BigInteger result = compute(InfixPostfixConverter.infixToPostfix(input));
+        return result.toString();
+
     }
 
     private void addVariable(String input) {
