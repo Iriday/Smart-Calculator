@@ -7,6 +7,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class InfixPostfixConverter {
+    private static final Pattern mainPattern = Pattern.compile(
+            "(^[+[-]]\\d+)|" +
+                    "([(][+[-]]\\d+[)])|" +
+                    "([\\da-zA-Z]+)|" +
+                    "([+[-]/*()^])");
 
     public static Queue<String> infixToPostfix(String infix) { //examples: 2 + 2 -> 2 2 +,  2 - 2 - 2 -> 2 2 - 2 -,  2 + 2 * 2 / 2 -> 2 2 2 * 2 / +,  2 ^ 2 -> 2 2 ^
         infix = mergeOperators(infix);
@@ -14,16 +19,11 @@ public class InfixPostfixConverter {
         Deque<String> stack = new ArrayDeque<>();
         Queue<String> queue = new ArrayDeque<>();
 
-        Pattern pattern = Pattern.compile(
-                "(^[+[-]]\\d+)|" +
-                        "([(][+[-]]\\d+[)])|" +
-                        "([\\da-zA-Z]+)|" +
-                        "([+[-]/*()^])");
-        Matcher matcher = pattern.matcher(infix);
-
+        Matcher matcher = mainPattern.matcher(infix);
+        String inputElement;
 
         while (matcher.find()) {
-            String inputElement = matcher.group();
+            inputElement = matcher.group();
 
             if (inputElement.matches("[(][+[-]]\\d+[)]")) {
                 queue.offer(inputElement.replaceAll("[()]", ""));
@@ -31,16 +31,16 @@ public class InfixPostfixConverter {
             } else if (inputElement.matches("[\\da-zA-Z]+|[+[-]]\\d+")) {
                 queue.offer(inputElement);
 
-            } else if (inputElement.matches("[(]")) {
+            } else if (inputElement.equals("(")) {
                 stack.offer(inputElement);
 
-            } else if (inputElement.matches("[)]")) {
+            } else if (inputElement.equals(")")) {
                 while (!stack.getLast().equals("(")) {
                     queue.offer(stack.removeLast());
                 }
                 stack.removeLast();
 
-            } else if (inputElement.matches("[+[-]]")) {
+            } else if (inputElement.equals("+") || inputElement.equals("-")) {
                 if (stack.isEmpty()) {
                     stack.offer(inputElement);
                 } else {
@@ -48,20 +48,20 @@ public class InfixPostfixConverter {
                     if ("(".equals(stackElement)) {
                         stack.offer(inputElement);
                     } else {
-                        while (!stack.isEmpty() && !"(".equals(stack.getLast())) {
+                        while (!stack.isEmpty() && !stack.getLast().equals("(")) {
                             queue.offer(stack.removeLast());
                         }
                         stack.offer(inputElement);
                     }
                 }
-            } else if (inputElement.matches("[*/]")) {
+            } else if (inputElement.equals("*") || inputElement.equals("/")) {
                 if (stack.isEmpty()) {
                     stack.offer(inputElement);
                 } else {
                     String stackElement = stack.getLast();
-                    if ("(".equals(stackElement)) {
+                    if (stackElement.equals("(")) {
                         stack.offer(inputElement);
-                    } else if ("+".equals(stackElement) || "-".equals(stackElement)) {
+                    } else if (stackElement.equals("+") || stackElement.equals("-")) {
                         stack.offer(inputElement);
                     } else {
                         while (!stack.isEmpty() && !stack.getLast().matches("[+[-](]")) {
@@ -70,7 +70,7 @@ public class InfixPostfixConverter {
                         stack.offer(inputElement);
                     }
                 }
-            } else if (inputElement.matches("\\^")) {
+            } else if (inputElement.equals("^")) {
                 stack.offer(inputElement);
             }
         }
