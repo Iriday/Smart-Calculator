@@ -1,28 +1,28 @@
 package calculator;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 public class ArithmeticOperations {
 
-    public static BigInteger add(BigInteger a, BigInteger b) {
+    public static BigDecimal add(BigDecimal a, BigDecimal b) {
         return a.add(b);
     }
 
-    public static BigInteger subtract(BigInteger a, BigInteger b) {
+    public static BigDecimal subtract(BigDecimal a, BigDecimal b) {
         return a.subtract(b);
     }
 
-    public static BigInteger multiply(BigInteger a, BigInteger b) {
+    public static BigDecimal multiply(BigDecimal a, BigDecimal b) {
         return a.multiply(b);
     }
 
-    public static BigInteger divide(BigInteger a, BigInteger b) {
+    public static BigDecimal divide(BigDecimal a, BigDecimal b) {
         return a.divide(b);
     }
 
-    public static BigInteger power(BigInteger a, BigInteger b) {
-        BigInteger result = a;
-        for (BigInteger i = BigInteger.ONE; i.compareTo(b) < 0; i = i.add(BigInteger.ONE)) {
+    public static BigDecimal power(BigDecimal a, BigDecimal b) {
+        BigDecimal result = a;
+        for (BigDecimal i = BigDecimal.ONE; i.compareTo(b) < 0; i = i.add(BigDecimal.ONE)) {
             result = result.multiply(a);
         }
         return result;

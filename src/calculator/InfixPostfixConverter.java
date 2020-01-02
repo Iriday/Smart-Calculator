@@ -8,8 +8,11 @@ import java.util.regex.Pattern;
 
 public class InfixPostfixConverter {
     private static final Pattern mainPattern = Pattern.compile(
-            "(^[+[-]]\\d+)|" +
+            "(^[+[-]]\\d+[.]\\d+)|" +
+                    "([(][+[-]]\\d+[.]\\d+[)])|" +
+                    "(^[+[-]]\\d+)|" +
                     "([(][+[-]]\\d+[)])|" +
+                    "(\\d+[.]\\d+)|" +
                     "([\\da-zA-Z]+)|" +
                     "([+[-]/*()^])");
 
@@ -25,10 +28,10 @@ public class InfixPostfixConverter {
         while (matcher.find()) {
             inputElement = matcher.group();
 
-            if (inputElement.matches("[(][+[-]]\\d+[)]")) {
+            if (inputElement.matches("[(][+[-]]\\d+[.]\\d+[)]|[(][+[-]]\\d+[)]")) {
                 queue.offer(inputElement.replaceAll("[()]", ""));
 
-            } else if (inputElement.matches("[\\da-zA-Z]+|[+[-]]\\d+")) {
+            } else if (inputElement.matches("(^[+[-]]\\d+[.]\\d+)|(\\d+[.]\\d+)|(^[+[-]]\\d+)|[\\da-zA-Z]+|")) {
                 queue.offer(inputElement);
 
             } else if (inputElement.equals("(")) {

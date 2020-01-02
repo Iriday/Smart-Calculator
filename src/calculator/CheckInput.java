@@ -1,6 +1,6 @@
 package calculator;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,9 +16,9 @@ class CheckInput {
     private static final String invalidIdentifier = "Invalid identifier";
     private static final String invalidAssignment = "Invalid assignment";
 
-    static String check(String input, Map<String, BigInteger> variables) {
+    static String check(String input, Map<String, BigDecimal> variables) {
 
-        if (input.matches(" */.*")) {
+        if (input.matches("/.*")) {
             return unknownCommand;
         }
         // check the beginning of the string
@@ -29,17 +29,17 @@ class CheckInput {
         if (!input.matches(".*[\\da-zA-Z][)]*$")) {
             return invalidExpression;
         }
-        if (input.matches(" *[-+]?\\d+ *")) {
+        if (input.matches("[-+]?\\d+|[-+]?\\d+\\.\\d+")) {
             return validInput;
         }
-        if (input.matches(" *[a-zA-Z]+ *")) {
+        if (input.matches("[a-zA-Z]+")) {
             String variable = input.trim();
             if (variables.containsKey(variable)) {
                 return validInput;
             } else
                 return unknownVariable;
         }
-        if (input.matches(".*[^\\d +[-]=a-zA-Z*/()^].*")) {
+        if (input.matches(".*[^\\d +[-]=a-zA-Z*/()^.].*")) {
             return invalidExpression;
         }
         if (input.matches(" *(\\d+[a-zA-Z]+|[a-zA-Z]+\\d+) *= *\\d+ *")) {
@@ -79,7 +79,7 @@ class CheckInput {
 
         int index = input.indexOf("=");
         if (index != -1) {
-            if (input.matches(" *[a-zA-Z]+ *= *[\\da-zA-Z]+ *")) {
+            if (input.matches(" *[a-zA-Z]+ *= *(\\d+[.]\\d+|[\\da-zA-Z]+) *")) {
                 return validInput;
             } else {
                 return invalidAssignment;
