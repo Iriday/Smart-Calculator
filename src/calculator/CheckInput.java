@@ -42,18 +42,18 @@ class CheckInput {
         if (input.matches(".*[^\\d +[-]=a-zA-Z*/()^.].*")) {
             return invalidExpression;
         }
-        if (input.matches(" *(\\d+[a-zA-Z]+|[a-zA-Z]+\\d+) *= *\\d+ *")) {
+        if (input.matches("(\\d+[a-zA-Z]+|[a-zA-Z]+\\d+)=\\d+")) {
             return invalidIdentifier;
         }
-        if (input.matches("(.*=.*=.*)|( *[a-zA-Z]+ *= *)")) {
+        if (input.matches("(.*=.*=.*)|([a-zA-Z]+=)")) {
             return invalidAssignment;
         }
         if (input.matches("(.*[a-zA-Z]+\\d+.*)|(.*\\d+[a-zA-Z]+.*)")) {
             return invalidAssignment;
 
         }
-        if (input.matches(" *[a-zA-Z]+ *= *[a-zA-Z]+ *")) {
-            Pattern pattern = Pattern.compile("[a-zA-Z] *$");
+        if (input.matches("[a-zA-Z]+=[a-zA-Z]+")) {
+            Pattern pattern = Pattern.compile("[a-zA-Z]$");
             matcher = pattern.matcher(input);
             matcher.find();
             String variableName = matcher.group().trim();
@@ -64,7 +64,7 @@ class CheckInput {
         if (input.matches(".*\\d+.*=.*[a-zA-Z\\d]+.*")) {
             return invalidAssignment;
         }
-        if (input.matches(" *[-+]?\\d+.*[a-zA-Z]+.*")) {
+        if (input.matches("[-+]?\\d+.*[a-zA-Z]+.*")) {
             Pattern variableNamePattern = Pattern.compile("[a-zA-Z]+");
             matcher = variableNamePattern.matcher(input);
             while (matcher.find()) {
@@ -79,7 +79,7 @@ class CheckInput {
 
         int index = input.indexOf("=");
         if (index != -1) {
-            if (input.matches(" *[a-zA-Z]+ *= *(\\d+[.]\\d+|[\\da-zA-Z]+) *")) {
+            if (input.matches("[a-zA-Z]+=(\\d+[.]\\d+|[\\da-zA-Z]+)")) {
                 return validInput;
             } else {
                 return invalidAssignment;
@@ -93,7 +93,7 @@ class CheckInput {
             }
         }
         //input = input.substring(index + 1);
-        Pattern pattern = Pattern.compile("[\\da-zA-Z]+( *[()]* *[[^+[-]*/^]&&[()]\\*] *)+?[()]* *[\\da-zA-Z]+");
+        Pattern pattern = Pattern.compile("[\\da-zA-Z]+([()]*[[^+[-]*/^]&&[()]\\*])+?[()]*[\\da-zA-Z]+");
         matcher = pattern.matcher(input);
         if (matcher.find()) {
             return invalidExpression;
