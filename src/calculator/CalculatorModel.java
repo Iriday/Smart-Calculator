@@ -9,9 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CalculatorModel {
-    private static final  Pattern numberWordPattern = Pattern.compile("\\d+[.]\\d+|[\\da-zA-Z]+");
+    private static final Pattern numberWordPattern = Pattern.compile("\\d+[.]\\d+|[\\da-zA-Z]+");
     private final Map<String, BigDecimal> variables = new HashMap<>();
-    private static final String help ="The program can add/subtract/multiply/divide numbers, supports parenthesis, variables, power operator.\n" +
+    private static final String help = "The program can add/subtract/multiply/divide numbers, supports parenthesis, variables, power operator.\n" +
             "Examples: 9 +++ 10 -- 8 * 3 / 2,\n" +
             "3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1),\n" +
             "a = 2,\n" +
@@ -39,10 +39,12 @@ public class CalculatorModel {
             addVariable(input);
             return "";//"variable added"
         }
-
-        BigDecimal result = compute(InfixPostfixConverter.infixToPostfix(input));
-        return result.toString();
-
+        try {
+            BigDecimal result = compute(InfixPostfixConverter.infixToPostfix(input));
+            return result.toString();
+        } catch (ArithmeticException e) {
+            return e.getMessage();
+        }
     }
 
     private void addVariable(String input) {
@@ -54,7 +56,7 @@ public class CalculatorModel {
         variables.put(variableName, variableValue);
     }
 
-    private  BigDecimal valueOf(String val) {
+    private BigDecimal valueOf(String val) {
         BigDecimal a;
         if (val.matches("[a-zA-Z]+")) {
             a = variables.get(val);
