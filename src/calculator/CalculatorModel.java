@@ -19,6 +19,10 @@ public class CalculatorModel {
             "a + -3 -5 + (b + a),\n" +
             "2 * 2^3.";
 
+    public CalculatorModel() {
+        addVariables();
+    }
+
     public String process(String input) {
         input = input.replaceAll(" +", "");
 
@@ -45,6 +49,11 @@ public class CalculatorModel {
         } catch (ArithmeticException e) {
             return e.getMessage();
         }
+    }
+
+    private void addVariables() {
+        variables.put("E", new BigDecimal(Math.E));
+        variables.put("PI", new BigDecimal(Math.PI));
     }
 
     private void addVariable(String input) {
