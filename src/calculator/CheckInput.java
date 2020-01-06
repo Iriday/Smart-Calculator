@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class CheckInput {
+public class CheckInput {
     private static final Pattern wordPattern = Pattern.compile("[a-zA-Z]+");
     private static Matcher matcher;
 
@@ -16,87 +16,101 @@ class CheckInput {
     private static final String invalidIdentifier = "Invalid identifier";
     private static final String invalidAssignment = "Invalid assignment";
 
-    static String check(String input, Map<String, BigDecimal> variables) {
+    public static String check(String input, Map<String, BigDecimal> variables) {
+        String result;
 
-        if (input.matches("/.*")) {
-            return unknownCommand;
+        result = singleValue(input, variables);
+        if (!result.equals("")) {
+            return result;
         }
-        // check the beginning of the string
-        if (!input.matches("^[(]*[-+]?[(]*[\\da-zA-Z].*")) {
-            return invalidExpression;
+
+        result = common(input);
+        if (!result.equals("")) {
+            return result;
         }
-        // check the end of the string
-        if (!input.matches(".*[\\da-zA-Z][)]*$")) {
-            return invalidExpression;
+
+        if (input.contains("=")) {
+            return assignment(input, variables);
         }
+
+        result = expression(input, variables);
+        if (!result.equals("")) {
+            return result;
+        }
+
+        return validInput;
+    }
+
+    private static String singleValue(String input, Map<String, BigDecimal> variables) {
+
         if (input.matches("[-+]?\\d+|[-+]?\\d+\\.\\d+")) {
             return validInput;
         }
+
         if (input.matches("[a-zA-Z]+")) {
-            String variable = input.trim();
-            if (variables.containsKey(variable)) {
-                return validInput;
-            } else
-                return unknownVariable;
+            return variables.containsKey(input) ? validInput : unknownVariable;
         }
+
+        if (input.startsWith("/")) {
+            return unknownCommand;
+        }
+
+        return "";
+    }
+
+    private static String common(String input) {
+
         if (input.matches(".*[^\\d +[-]=a-zA-Z*/()^.].*")) {
             return invalidExpression;
         }
-        if (input.matches("(\\d+[a-zA-Z]+|[a-zA-Z]+\\d+)=\\d+")) {
+
+        // check the beginning of a string
+        if (!input.matches("^[(]*[-+]?[(]*[\\da-zA-Z].*")) {
+            return invalidExpression;
+        }
+
+        // check the end of a string
+        if (!input.matches(".*[\\da-zA-Z][)]*$")) {
+            return invalidExpression;
+        }
+
+        if (input.matches(".*(\\d+[a-zA-Z]+|[a-zA-Z]+\\d+).*")) {
             return invalidIdentifier;
         }
-        if (input.matches("(.*=.*=.*)|([a-zA-Z]+=)")) {
-            return invalidAssignment;
-        }
-        if (input.matches("(.*[a-zA-Z]+\\d+.*)|(.*\\d+[a-zA-Z]+.*)")) {
-            return invalidAssignment;
 
+        return "";
+    }
+
+    private static String assignment(String input, Map<String, BigDecimal> variables) {
+
+        if (!input.matches("[a-zA-z]+=([\\da-zA-Z]+|\\d+\\.\\d+)")) {
+            return invalidAssignment;
         }
+
         if (input.matches("[a-zA-Z]+=[a-zA-Z]+")) {
-            Pattern pattern = Pattern.compile("[a-zA-Z]$");
-            matcher = pattern.matcher(input);
+            matcher = Pattern.compile("[a-zA-Z]+$").matcher(input);
             matcher.find();
-            String variableName = matcher.group().trim();
+            String variableName = matcher.group();
             if (!variables.containsKey(variableName)) {
                 return unknownVariable;
             }
         }
-        if (input.matches(".*\\d+.*=.*[a-zA-Z\\d]+.*")) {
-            return invalidAssignment;
-        }
-        if (input.matches("[-+]?\\d+.*[a-zA-Z]+.*")) {
-            Pattern variableNamePattern = Pattern.compile("[a-zA-Z]+");
-            matcher = variableNamePattern.matcher(input);
-            while (matcher.find()) {
-                if (!variables.containsKey(matcher.group())) {
-                    return unknownVariable;
-                }
-            }
-        }
+
+        return validInput;
+    }
+
+    private static String expression(String input, Map<String, BigDecimal> variables) {
+
         if (input.matches(".*[*]{2,}.*|.*[/]{2,}.*|.*[*&&/].*|.*[/&&*].*")) {
-            return invalidAssignment;
+            return invalidExpression;
         }
 
-        int index = input.indexOf("=");
-        if (index != -1) {
-            if (input.matches("[a-zA-Z]+=(\\d+[.]\\d+|[\\da-zA-Z]+)")) {
-                return validInput;
-            } else {
-                return invalidAssignment;
-            }
-        }
         // check all variables
         matcher = wordPattern.matcher(input);
         while (matcher.find()) {
             if (!variables.containsKey(matcher.group())) {
                 return unknownVariable;
             }
-        }
-        //input = input.substring(index + 1);
-        Pattern pattern = Pattern.compile("[\\da-zA-Z]+([()]*[[^+[-]*/^]&&[()]\\*])+?[()]*[\\da-zA-Z]+");
-        matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return invalidExpression;
         }
 
         if (input.contains("(") || input.contains(")")) {
@@ -105,6 +119,13 @@ class CheckInput {
                 return invalidExpression;
             }
         }
-        return validInput;
+
+        Pattern pattern = Pattern.compile("[\\da-zA-Z]+([()]*[[^+[-]*/^]&&[()]\\*])+?[()]*[\\da-zA-Z]+");
+        matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return invalidExpression;
+        }
+
+        return "";
     }
 }
