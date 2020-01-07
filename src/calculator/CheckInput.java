@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 public class CheckInput {
     private static final Pattern wordPattern = Pattern.compile("[a-zA-Z]+");
+    private static final Pattern operatorsPattern = Pattern.compile("[*/^]|\\++-?|-+\\+?");
     private static Matcher matcher;
 
     private static final String validInput = "valid";
@@ -101,10 +102,6 @@ public class CheckInput {
 
     private static String expression(String input, Map<String, BigDecimal> variables) {
 
-        if (input.matches(".*[*]{2,}.*|.*[/]{2,}.*|.*[*&&/].*|.*[/&&*].*")) {
-            return invalidExpression;
-        }
-
         // check all variables
         matcher = wordPattern.matcher(input);
         while (matcher.find()) {
@@ -113,6 +110,7 @@ public class CheckInput {
             }
         }
 
+        // check parenthesis
         if (input.contains("(") || input.contains(")")) {
             String parenthesis = input.replaceAll("[^()]+", "");
             if (parenthesis.length() % 2 != 0) {
@@ -120,10 +118,14 @@ public class CheckInput {
             }
         }
 
-        Pattern pattern = Pattern.compile("[\\da-zA-Z]+([()]*[[^+[-]*/^]&&[()]\\*])+?[()]*[\\da-zA-Z]+");
-        matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return invalidExpression;
+        // check operators
+        String[] operators = input.split("[()]*(\\d+\\.\\d+|[\\da-zA-Z]+)[()]*");
+        //System.out.println(Arrays.toString(operators));
+        for (int i = 1; i < operators.length; i++) {
+            matcher = operatorsPattern.matcher(operators[i]); // "[*/^]|\\++-?|-+\\+?"
+            if (!matcher.matches()) {
+                return invalidExpression;
+            }
         }
 
         return "";
