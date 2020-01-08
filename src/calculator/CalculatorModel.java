@@ -26,7 +26,7 @@ public class CalculatorModel {
         if (input.isEmpty()) {
             return input;
         }
-        if (input.startsWith("/")) {
+        if (input.startsWith("/")) { //command
             return executeCommand(input);
         }
 
@@ -34,9 +34,9 @@ public class CalculatorModel {
         if (!checkResult.equals(CheckInput.VALID_INPUT)) {
             return checkResult;
         }
-        if (input.matches("[a-zA-Z]+=(\\d+|\\d+[.]\\d+|[a-zA-Z]+)")) {
+        if (input.contains("=")) { //assignment
             addVariable(input);
-            return "";//"variable added"
+            return ""; //variable added
         }
         try {
             BigDecimal result = compute(InfixPostfixConverter.infixToPostfix(input));
