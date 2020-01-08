@@ -10,12 +10,12 @@ public class CheckInput {
     private static final Pattern operatorsPattern = Pattern.compile("[*/^]|\\++-?|-+\\+?");
     private static Matcher matcher;
 
-    private static final String validInput = "valid";
-    private static final String unknownCommand = "Unknown command";
-    private static final String invalidExpression = "Invalid expression";
-    private static final String unknownVariable = "Unknown variable";
-    private static final String invalidIdentifier = "Invalid identifier";
-    private static final String invalidAssignment = "Invalid assignment";
+    public static final String VALID_INPUT = "valid";
+    public static final String UNKNOWN_COMMAND = "Unknown command";
+    public static final String INVALID_EXPRESSION = "Invalid expression";
+    public static final String UNKNOWN_VARIABLE = "Unknown variable";
+    public static final String INVALID_IDENTIFIER = "Invalid identifier";
+    public static final String INVALID_ASSIGNMENT = "Invalid assignment";
 
     public static String check(String input, Map<String, BigDecimal> variables) {
         String result;
@@ -39,21 +39,21 @@ public class CheckInput {
             return result;
         }
 
-        return validInput;
+        return VALID_INPUT;
     }
 
     private static String singleValue(String input, Map<String, BigDecimal> variables) {
 
         if (input.matches("[-+]?\\d+|[-+]?\\d+\\.\\d+")) {
-            return validInput;
+            return VALID_INPUT;
         }
 
         if (input.matches("[a-zA-Z]+")) {
-            return variables.containsKey(input) ? validInput : unknownVariable;
+            return variables.containsKey(input) ? VALID_INPUT : UNKNOWN_VARIABLE;
         }
 
         if (input.startsWith("/")) {
-            return unknownCommand;
+            return UNKNOWN_COMMAND;
         }
 
         return "";
@@ -62,21 +62,21 @@ public class CheckInput {
     private static String common(String input) {
 
         if (input.matches(".*[^\\d +[-]=a-zA-Z*/()^.].*")) {
-            return invalidExpression;
+            return INVALID_EXPRESSION;
         }
 
         // check the beginning of a string
         if (!input.matches("^[(]*[-+]?[(]*[\\da-zA-Z].*")) {
-            return invalidExpression;
+            return INVALID_EXPRESSION;
         }
 
         // check the end of a string
         if (!input.matches(".*[\\da-zA-Z][)]*$")) {
-            return invalidExpression;
+            return INVALID_EXPRESSION;
         }
 
         if (input.matches(".*(\\d+[a-zA-Z]+|[a-zA-Z]+\\d+).*")) {
-            return invalidIdentifier;
+            return INVALID_IDENTIFIER;
         }
 
         return "";
@@ -85,7 +85,7 @@ public class CheckInput {
     private static String assignment(String input, Map<String, BigDecimal> variables) {
 
         if (!input.matches("[a-zA-z]+=([\\da-zA-Z]+|\\d+\\.\\d+)")) {
-            return invalidAssignment;
+            return INVALID_ASSIGNMENT;
         }
 
         if (input.matches("[a-zA-Z]+=[a-zA-Z]+")) {
@@ -93,11 +93,11 @@ public class CheckInput {
             matcher.find();
             String variableName = matcher.group();
             if (!variables.containsKey(variableName)) {
-                return unknownVariable;
+                return UNKNOWN_VARIABLE;
             }
         }
 
-        return validInput;
+        return VALID_INPUT;
     }
 
     private static String expression(String input, Map<String, BigDecimal> variables) {
@@ -106,7 +106,7 @@ public class CheckInput {
         matcher = wordPattern.matcher(input);
         while (matcher.find()) {
             if (!variables.containsKey(matcher.group())) {
-                return unknownVariable;
+                return UNKNOWN_VARIABLE;
             }
         }
 
@@ -114,7 +114,7 @@ public class CheckInput {
         if (input.contains("(") || input.contains(")")) {
             String parenthesis = input.replaceAll("[^()]+", "");
             if (parenthesis.length() % 2 != 0) {
-                return invalidExpression;
+                return INVALID_EXPRESSION;
             }
         }
 
@@ -124,7 +124,7 @@ public class CheckInput {
         for (int i = 1; i < operators.length; i++) {
             matcher = operatorsPattern.matcher(operators[i]); // "[*/^]|\\++-?|-+\\+?"
             if (!matcher.matches()) {
-                return invalidExpression;
+                return INVALID_EXPRESSION;
             }
         }
 

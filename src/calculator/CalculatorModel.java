@@ -1,10 +1,7 @@
 package calculator;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,14 +26,12 @@ public class CalculatorModel {
         if (input.isEmpty()) {
             return input;
         }
-        if ("/exit".equalsIgnoreCase(input)) {
-            return "Bye!";
-        } else if ("/help".equalsIgnoreCase(input)) {
-            return help;
+        if (input.startsWith("/")) {
+            return executeCommand(input);
         }
 
         String checkResult = CheckInput.check(input, variables);
-        if (!checkResult.equals("valid")) {
+        if (!checkResult.equals(CheckInput.VALID_INPUT)) {
             return checkResult;
         }
         if (input.matches("[a-zA-Z]+=(\\d+|\\d+[.]\\d+|[a-zA-Z]+)")) {
@@ -54,6 +49,26 @@ public class CalculatorModel {
     private void addVariables() {
         variables.put("E", new BigDecimal(Math.E));
         variables.put("PI", new BigDecimal(Math.PI));
+    }
+
+    private String executeCommand(String command) {
+        switch (command.toLowerCase(Locale.ENGLISH)) {
+            case "/exit":
+                return "Bye!";
+            case "/help":
+                return help;
+            case "/variables":
+                StringBuilder builder = new StringBuilder();
+                for (Map.Entry entry : variables.entrySet()) {
+                    builder.append(entry.getKey());
+                    builder.append(" = ");
+                    builder.append(entry.getValue());
+                    builder.append("\n");
+                }
+                return builder.toString();
+            default:
+                return CheckInput.UNKNOWN_COMMAND;
+        }
     }
 
     private void addVariable(String input) {
