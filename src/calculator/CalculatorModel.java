@@ -8,13 +8,9 @@ import java.util.regex.Pattern;
 public class CalculatorModel {
     private static final Pattern numberWordPattern = Pattern.compile("\\d+[.]\\d+|[\\da-zA-Z]+");
     private final Map<String, BigDecimal> variables = new HashMap<>();
-    private static final String help = "The program can add/subtract/multiply/divide numbers, supports parenthesis, variables, power operator.\n" +
-            "Examples: 9 +++ 10 -- 8 * 3 / 2,\n" +
-            "3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1),\n" +
-            "a = 2,\n" +
-            "b = 3,\n" +
-            "a + -3 -5 + (b + a),\n" +
-            "2 * 2^3.";
+    private static final String help = "The program can: add/subtract/multiply/divide numbers, supports parenthesis, variables, power operator.\n" +
+            "Example: a = 2\none = 1\n2^3 +++ +8.2 * ((4 - a) * 2.5 * one ) --- +6 / (E * PI)^2\n" +
+            "Commands: /exit, /help, /variables";
 
     public CalculatorModel() {
         addVariables();
