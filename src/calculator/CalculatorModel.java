@@ -91,7 +91,7 @@ public class CalculatorModel {
         BigDecimal a;
         BigDecimal b;
         for (String element : inputPostfix) {
-            if (element.matches("^[+[-]]\\d+[.]\\d+|\\d+[.]\\d+|^[+[-]]\\d+|[\\da-zA-Z]+")) {
+            if (element.matches("[+[-]]?\\d+[.]\\d+|[+[-]]?\\d+|[a-zA-Z]+")) {
                 result.push(valueOf(element));
             } else if (element.equals("+")) {
                 a = result.pop();
