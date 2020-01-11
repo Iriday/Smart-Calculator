@@ -66,7 +66,7 @@ public class CheckInput {
         }
 
         // check the beginning of a string
-        if (!input.matches("^[(]*[-+]?[(]*[\\da-zA-Z].*")) {
+        if (!input.matches("^[(]*[-+]?[\\da-zA-Z].*")) {
             return INVALID_EXPRESSION;
         }
 
