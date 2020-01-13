@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 public class CalculatorModel {
     private static final Pattern numberWordPattern = Pattern.compile("\\d+[.]\\d+|[\\da-zA-Z]+");
     private final Map<String, BigDecimal> variables = new HashMap<>();
+    private boolean removeTrailingZeros = true;
     private static final String help = "The program can: add/subtract/multiply/divide numbers, supports parenthesis, variables, power operator.\n" +
             "Example: a = 2\none = 1\n2^3 +++ +8.2 * ((4 - a) * 2.5 * one ) --- +6 / (E * PI)^2\n" +
             "Commands: /exit, /help, /variables";
@@ -35,8 +36,11 @@ public class CalculatorModel {
             return ""; //variable added
         }
         try {
-            BigDecimal result = compute(InfixPostfixConverter.infixToPostfix(input));
-            return result.toString();
+            String result = compute(InfixPostfixConverter.infixToPostfix(input)).toString();
+            if (removeTrailingZeros) {
+                result = removeTrailingZeros(result);
+            }
+            return result;
         } catch (ArithmeticException e) {
             return e.getMessage();
         }
@@ -62,9 +66,16 @@ public class CalculatorModel {
                     builder.append("\n");
                 }
                 return builder.toString();
+            case "/trailing_zeros":
+                removeTrailingZeros = !removeTrailingZeros;
+                return removeTrailingZeros ? "Removing trailing zeros" : "Showing trailing zeros";
             default:
                 return CheckInput.UNKNOWN_COMMAND;
         }
+    }
+
+    private String removeTrailingZeros(String input) {
+        return input.contains(".") && input.charAt(input.length() - 1) == '0' ? input.replaceFirst("\\.?0+$", "") : input;
     }
 
     private void addVariable(String input) {
