@@ -6,7 +6,7 @@ import java.util.Map;
 public class Commands {
     private static final String help = "The program can: add/subtract/multiply/divide numbers, supports parenthesis, variables, power operator.\n" +
             "Example: a = 2\none = 1\n2^3 +++ +8.2 * ((4 - a) * 2.5 * one ) --- +6 / (E * PI)^2\n" +
-            "Commands: /exit, /help, /variables";
+            "Commands: /exit, /help, /variables, /trailing_zeros";
 
     public static String executeCommand(String command, CalculatorModel model) {
         switch (command.toLowerCase(Locale.ENGLISH)) {
